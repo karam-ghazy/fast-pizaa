@@ -2,16 +2,17 @@ import LinkButton from "../../ui/LinkButton";
 import Button from "../../ui/Button";
 import CartItem from "./CartItem";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "./cartSlice";
+import { clearCart, getCart } from "./cartSlice";
+import EmptyCart from "./EmptyCart";
 
 function Cart() {
   const dispatch = useDispatch();
 
   const username = useSelector((state) => state.user.username);
 
-  const cart = useSelector((state) => state.cart.cart);
+  const cart = useSelector(getCart);
 
-  // const cart = fakeCart;
+  if (cart.length === 0) return <EmptyCart />;
 
   return (
     <div className="px-4 py-3">
