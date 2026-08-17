@@ -52,8 +52,9 @@ const userSlice = createSlice({
         state.address = action.payload.address;
         state.status = "idle";
       })
-      .addCase(fetchUserAddress.rejected, (state, action) => {
-        state.error = action.error.message;
+      .addCase(fetchUserAddress.rejected, (state) => {
+        state.error =
+          "Could not get user position. Please enter your address manually or make sure to allow location access.";
         state.status = "error";
       }),
 });

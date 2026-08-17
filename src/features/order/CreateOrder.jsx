@@ -17,7 +17,15 @@ const isValidPhone = (str) =>
 
 function CreateOrder() {
   const cart = useSelector(getCart);
-  const username = useSelector((state) => state.user.username);
+  const {
+    username,
+    address,
+    error: errorAddress,
+    position,
+    status: statusAddress,
+  } = useSelector((state) => state.user);
+  const isLoadingAddress = statusAddress === "loading";
+
   const dispatch = useDispatch();
 
   const navigate = useNavigation();
@@ -35,12 +43,7 @@ function CreateOrder() {
   return (
     <div className="px-4 py-6">
       <h2 className="mb-8 text-xl font-semibold">Ready to order? Let's go!</h2>
-      <button
-        onClick={() => dispatch(fetchUserAddress())}
-        className="btn btn--primary"
-      >
-        Get Position
-      </button>
+
       {/* <Form method="POST" action="order/new"> */}
       <Form method="POST">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -68,13 +71,30 @@ function CreateOrder() {
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <label className="sm:basis-40">Address</label>
-          <div className="grow">
+          <div className="relative grow">
             <input
               className="input w-full"
               type="text"
               name="address"
               required
+              defaultValue={address}
             />
+            {!position.longitude && !position.latitude && (
+              <span className="absolute right-1 top-1">
+                <Button
+                  type="small"
+                  onClick={() => dispatch(fetchUserAddress())}
+                  disabled={isLoadingAddress}
+                >
+                  {isLoadingAddress ? "Getting Position..." : "Get Position"}
+                </Button>
+              </span>
+            )}
+            {statusAddress === "error" && (
+              <p className="mt-2 w-fit rounded-md bg-red-100 p-2 text-xs text-red-700">
+                {errorAddress}
+              </p>
+            )}
           </div>
         </div>
 
@@ -94,6 +114,15 @@ function CreateOrder() {
 
         <div>
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
+          <input
+            type="hidden"
+            name="position"
+            value={
+              position.latitude && position.longitude
+                ? `${position.latitude},${position.longitude}`
+                : ""
+            }
+          />
           <Button disabled={isSubmitting} type="primary">
             {isSubmitting
               ? "Placing order..."
@@ -122,6 +151,8 @@ export async function action({ request }) {
   if (Object.keys(errors).length > 0) {
     return errors;
   }
+
+  console.log(order);
 
   const newOrder = await createOrder(order);
 
