@@ -152,8 +152,6 @@ export async function action({ request }) {
     return errors;
   }
 
-  console.log(order);
-
   const newOrder = await createOrder(order);
 
   store.dispatch(clearCart());
